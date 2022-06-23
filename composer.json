@@ -1,0 +1,21 @@
+{
+  "name": "highdev/registry",
+  "description": "Registry component helper for registry and Symfony Framework.",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Highdev\\Registry\\": "src/Highdev/Registry"
+    }
+  },
+  "authors": [
+    {
+      "name": "Roman",
+      "email": "bizrenay@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.1",
+    "symfony/dependency-injection": "^5.4"
+  }
+}

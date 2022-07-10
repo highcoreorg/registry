@@ -34,9 +34,8 @@ final class ServiceRegistryPass implements CompilerPassInterface
         $ids = $container->findTaggedServiceIds($this->definition);
 
         foreach ($ids as $className => $attributes) {
-            $filtered = \array_filter($attributes,
-                static fn(array $item): bool
-                    => isset($item[$this->attributeName]));
+            $filtered = \array_filter($attributes, fn (array $item): bool
+                => isset($item[$this->attributeName]));
 
             if (0 === \count($filtered)) {
                 continue;

@@ -19,12 +19,10 @@ use Symfony\Component\DependencyInjection\Reference;
 
 final class ServiceRegistryPass implements CompilerPassInterface
 {
-    private string $definition;
-
-    public function __construct(string $definition)
-    {
-        $this->definition = $definition;
-    }
+    public function __construct(
+        private readonly string $definition,
+        private readonly string $attributeName = 'code'
+    ) {}
 
     public function process(ContainerBuilder $container): void
     {
@@ -38,13 +36,13 @@ final class ServiceRegistryPass implements CompilerPassInterface
         foreach ($ids as $className => $attributes) {
             $filtered = \array_filter($attributes,
                 static fn(array $item): bool
-                    => isset($item['code']));
+                    => isset($item[$this->attributeName]));
 
             if (0 === \count($filtered)) {
                 continue;
             }
 
-            $code = $filtered[0]['code'];
+            $code = $filtered[0][$this->attributeName];
             $reference = new Reference($className);
 
             try {

@@ -1,11 +1,11 @@
 {
-  "name": "highdev/registry",
+  "name": "highcore/registry",
   "description": "Registry component helper for registry and Symfony Framework.",
   "type": "library",
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Highdev\\Registry\\": "src/Highdev/Registry"
+      "Highcore\\Registry\\": "src/Highcore/Registry"
     }
   },
   "authors": [

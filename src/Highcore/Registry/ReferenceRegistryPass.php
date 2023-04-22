@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Highdev group.
+ * This file is part of the Highcore group.
  *
  * (c) Roman Cherniakhovsky <bizrenay@gmail.com>
  *
@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Highdev\Registry;
+namespace Highcore\Registry;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

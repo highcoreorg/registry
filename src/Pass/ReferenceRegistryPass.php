@@ -11,18 +11,24 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Highcore\Registry;
+namespace Highcore\Component\Registry\Pass;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
-final class ServiceRegistryPass implements CompilerPassInterface
+final class ReferenceRegistryPass implements CompilerPassInterface, LoggerAwareInterface
 {
-    public function __construct(
-        private readonly string $definition,
-        private readonly string $attributeName = 'code'
-    ) {}
+    use LoggerAwareTrait;
+
+    private string $definition;
+
+    public function __construct(string $definition)
+    {
+        $this->definition = $definition;
+    }
 
     public function process(ContainerBuilder $container): void
     {
@@ -34,19 +40,10 @@ final class ServiceRegistryPass implements CompilerPassInterface
         $ids = $container->findTaggedServiceIds($this->definition);
 
         foreach ($ids as $className => $attributes) {
-            $filtered = \array_filter($attributes, fn (array $item): bool
-                => isset($item[$this->attributeName]));
-
-            if (0 === \count($filtered)) {
-                continue;
-            }
-
-            $code = $filtered[0][$this->attributeName];
-            $reference = new Reference($className);
-
-            try {
-                $registryDefinition->addMethodCall('register', [$code, $reference]);
-            } catch (\Exception $ex) {}
+            $registryDefinition->addMethodCall('register', [
+                $className,
+                new Reference($className)
+            ]);
         }
     }
 }

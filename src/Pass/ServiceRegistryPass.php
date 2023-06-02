@@ -11,20 +11,18 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Highcore\Registry;
+namespace Highcore\Component\Registry\Pass;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
-final class ReferenceRegistryPass implements CompilerPassInterface
+final class ServiceRegistryPass implements CompilerPassInterface
 {
-    private string $definition;
-
-    public function __construct(string $definition)
-    {
-        $this->definition = $definition;
-    }
+    public function __construct(
+        private readonly string $definition,
+        private readonly string $attributeName = 'code'
+    ) {}
 
     public function process(ContainerBuilder $container): void
     {
@@ -36,15 +34,17 @@ final class ReferenceRegistryPass implements CompilerPassInterface
         $ids = $container->findTaggedServiceIds($this->definition);
 
         foreach ($ids as $className => $attributes) {
-            try {
-                $reference = new Reference($className);
+            $filtered = \array_filter($attributes, fn (array $item): bool
+                => isset($item[$this->attributeName]));
 
-                $registryDefinition->addMethodCall('register', [
-                    $className,
-                    $reference
-                ]);
-            } catch (\Exception $ex) {
+            if (0 === \count($filtered)) {
+                continue;
             }
+
+            $registryDefinition->addMethodCall('register', [
+                $filtered[0][$this->attributeName],
+                new Reference($className)]
+            );
         }
     }
 }

@@ -42,7 +42,7 @@ class NonExistingServiceException extends \InvalidArgumentException
     /**
      * @param array<string, ServiceMethodItem> $existingServices
      */
-    public static function formatServiceMethodItems(array $existingServices): array
+    private static function formatServiceMethodItems(array $existingServices): array
     {
         $results = [];
 

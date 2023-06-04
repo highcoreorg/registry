@@ -93,7 +93,7 @@ final class SinglePrioritizedServiceRegistry implements SinglePrioritizedService
         }
     }
 
-    public function getSortedRegistry(): array
+    private function getSortedRegistry(): array
     {
         if (!$this->sorted) {
             $this->sortRegistry();

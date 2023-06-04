@@ -6,68 +6,128 @@ namespace Highcore\Component\Registry\Tests;
 
 use Highcore\Component\Registry\Exception\ExistingServiceException;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
-use Highcore\Component\Registry\IdentityServiceRegistryInterface;
+use Highcore\Component\Registry\IdentityServiceRegistry;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
-final class IdentityServiceRegistryTest
+final class IdentityServiceRegistryTest extends TestCase
 {
-    /** @var array<string, T> */
-    private array $services = [];
+    public function test_fail_get_unregistered_service(): void
+    {
+        $registry = new IdentityServiceRegistry(TestServiceInterface::class);
 
-    /**
-     * @param class-string<T> $interface
-     */
-    public function __construct(
-        private readonly string $interface,
-        private readonly string $context = 'service'
-    ) {
+        $this->expectException(NonExistingServiceException::class);
+        $this->expectExceptionMessageMatches(sprintf(
+            '/^Service "%s" does not exist, available service services: ("[a-z0-9_]+"(, )?)+$/',
+            addcslashes(TestService::class, '\\')
+        ));
+
+        $registry->register('test_service', new TestService());
+        $registry->register('test_service_3', new TestService());
+
+        $registry->get(TestService::class);
     }
 
-    public function all(): array
+    public function test_get_registered_service(): void
     {
-        return $this->services;
+        $registry = new IdentityServiceRegistry(TestServiceInterface::class);
+
+        $service1 = new TestService();
+        $service1->test = 'test';
+
+        $registry->register(TestService::class, $service1);
+        $registry->register('test_service_3', new TestService());
+
+        self::assertEquals($service1->test, $registry->get(TestService::class)->test);
     }
 
-    /**
-     * @param T $service
-     */
-    public function register(string $identifier, $service): void
+    public function test_correct_register_with_interface(): void
     {
-        if ($this->has($identifier)) {
-            throw ExistingServiceException::createFromContextAndType($this->context, $identifier);
+        $registry = new IdentityServiceRegistry(TestServiceInterface::class);
+
+        $services=  [];
+        $services[TestService::class] = new TestService();
+        $services['test_service'] = new TestService();
+
+        foreach ($services as $key => $service) {
+            $registry->register($key, $service);
+
+            self::assertTrue($registry->has($key));
+            self::assertInstanceOf(TestServiceInterface::class, $registry->get($key));
         }
-
-        if (!$service instanceof $this->interface) {
-            throw new \InvalidArgumentException(
-                sprintf('%s needs to be of type "%s", "%s" given.', ucfirst($this->context), $this->interface, get_class($service))
-            );
-        }
-
-        $this->services[$identifier] = $service;
     }
 
-    public function unregister(string $identifier): void
+    public function test_correct_register_without_interface(): void
     {
-        if (!$this->has($identifier)) {
-            throw NonExistingServiceException::createFromContextAndType($this->context, $identifier, array_keys($this->services));
-        }
+        $registry = new IdentityServiceRegistry();
 
-        unset($this->services[$identifier]);
+        $services=  [];
+        $services[TestService::class] = new TestService();
+        $services['test_service'] = new TestService();
+
+        foreach ($services as $key => $service) {
+            $registry->register($key, $service);
+
+            self::assertTrue($registry->has($key));
+            self::assertInstanceOf(get_class($service), $registry->get($key));
+        }
     }
 
-    public function has(string $identifier): bool
+    public function test_double_register_service(): void
     {
-        return isset($this->services[$identifier]);
+        $this->expectException(ExistingServiceException::class);
+        $this->expectExceptionMessageMatches(sprintf(
+            '/^Service of type "%s" already exists\.$/',
+            addcslashes(TestService::class, '\\')
+        ));
+
+        $registry = new IdentityServiceRegistry(TestServiceInterface::class);
+        $registry->register(TestService::class, new TestService());
+        $registry->register(TestService::class, new TestService());
     }
 
-    /**
-     * @return T
-     */
-    public function get(string $identifier): object
+    public function test_incorrect_register_with_interface(): void
     {
-        if (!$this->has($identifier)) {
-            throw NonExistingServiceException::createFromContextAndType($this->context, $identifier, array_keys($this->services));
-        }
+        $registry = new IdentityServiceRegistry(TestServiceInterface::class);
 
-        return $this->services[$identifier];
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches(\sprintf(
+            '/^Service needs to be of type "%s", ".*" given\.$/',
+            addcslashes(TestServiceInterface::class, '\\')
+        ));
+
+        $registry->register('test_anonymous', new class {});
+    }
+
+    public function test_has_unregistered_service(): void
+    {
+        $registry = new IdentityServiceRegistry(TestServiceInterface::class);
+        self::assertFalse($registry->has(TestService::class));
+        self::assertFalse($registry->has('test_service'));
+    }
+
+    public function test_has_registered_service(): void
+    {
+        $registry = new IdentityServiceRegistry(TestServiceInterface::class);
+        $registry->register(TestService::class, new TestService());
+        $registry->register('test_service', new TestService());
+
+        self::assertTrue($registry->has('test_service'));
+        self::assertTrue($registry->has(TestService::class));
+    }
+
+    public function test_fail_unregister_unregistered_service(): void
+    {
+        $registry = new IdentityServiceRegistry(TestServiceInterface::class);
+
+        $this->expectException(NonExistingServiceException::class);
+        $this->expectExceptionMessageMatches(sprintf(
+            '/^Service "%s" does not exist, available service services: ("[a-z0-9_]+"(, )?)+$/',
+            addcslashes(TestService::class, '\\')
+        ));
+
+        $registry->register('test_service', new TestService());
+        $registry->register('test_service_2', new TestService());
+        $registry->unregister(TestService::class);
     }
 }

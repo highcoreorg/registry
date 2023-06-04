@@ -18,10 +18,10 @@ final class IdentityServiceRegistry implements IdentityServiceRegistryInterface
     private array $services = [];
 
     /**
-     * @param class-string<T> $interface
+     * @param null|class-string<T> $interface
      */
     public function __construct(
-        private readonly string $interface,
+        private readonly ?string $interface = null,
         private readonly string $context = 'service'
     ) {
     }
@@ -40,7 +40,7 @@ final class IdentityServiceRegistry implements IdentityServiceRegistryInterface
             throw ExistingServiceException::createFromContextAndType($this->context, $identifier);
         }
 
-        if (!$service instanceof $this->interface) {
+        if (null !== $this->interface && !$service instanceof $this->interface) {
             throw new \InvalidArgumentException(
                 sprintf('%s needs to be of type "%s", "%s" given.', ucfirst($this->context), $this->interface, get_class($service))
             );

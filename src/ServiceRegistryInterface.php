@@ -23,12 +23,12 @@ interface ServiceRegistryInterface
      * @throws ExistingServiceException
      * @throws \InvalidArgumentException
      */
-    public function register($service): void;
+    public function register(object $service): void;
 
     /**
      * @throws NonExistingServiceException
      */
-    public function unregister($service): void;
+    public function unregister(string|object  $service): void;
 
-    public function has($service): bool;
+    public function has(string|object $service): bool;
 }

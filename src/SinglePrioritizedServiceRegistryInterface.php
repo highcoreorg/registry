@@ -23,17 +23,17 @@ interface SinglePrioritizedServiceRegistryInterface
      * @throws ExistingServiceException
      * @throws \InvalidArgumentException
      */
-    public function register($service, int $priority = 0): void;
+    public function register(object $service, int $priority = 0): void;
 
     /**
      * @param T $service
      *
      * @throws NonExistingServiceException
      */
-    public function unregister($service): void;
+    public function unregister(object $service): void;
 
     /**
      * @param T $service
      */
-    public function has($service): bool;
+    public function has(object $service): bool;
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Highcore\Component\Registry;
 
+use Highcore\Component\Registry\Exception\ExistingServiceException;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
 
 /**
@@ -43,50 +44,47 @@ final class SinglePrioritizedServiceRegistry implements SinglePrioritizedService
      * @param T $service
      * @param int $priority
      */
-    public function register($service, int $priority = 0): void
+    public function register(object $service, int $priority = 0): void
     {
         $this->assertServiceIsInstanceOfServiceType($service);
 
-        $this->registry[] = [$this->context => $service, 'priority' => $priority];
+        if ($this->has($service)) {
+            throw ExistingServiceException::createFromContextAndType(
+                $this->context,
+                get_class($service),
+            );
+        }
+
+        $this->registry[$this->createServiceId($service)] = [$this->context => $service, 'priority' => $priority];
         $this->sorted = false;
     }
 
-    public function unregister($service): void
+    public function unregister(object $service): void
     {
-        $context = $this->context;
-
         if (!$this->has($service)) {
             throw NonExistingServiceException::createFromContextAndType(
                 $this->context,
                 get_class($service),
-                array_map('get_class', array_column($this->registry, $context))
+                array_map('get_class', array_column($this->registry, $this->context))
             );
         }
 
-        $this->registry = array_filter($this->registry, static function (array $record) use ($context, $service): bool {
-            return get_class($record[$context]) !== get_class($service);
-        });
+        unset($this->registry[$this->createServiceId($service)]);
     }
 
-    public function has($service): bool
+    public function has(object $service): bool
     {
         $this->assertServiceIsInstanceOfServiceType($service);
 
-        foreach ($this->registry as $record) {
-            if ($record[$this->context] === $service) {
-                return true;
-            }
-        }
-
-        return false;
+        return isset($this->registry[$this->createServiceId($service)]);
     }
 
     private function assertServiceIsInstanceOfServiceType(object $service): void
     {
         if (null !== $this->interface && !$service instanceof $this->interface) {
             throw new \InvalidArgumentException(sprintf(
-                '%s needs to implements "%s", "%s" given.',
-                $this->context,
+                '%s needs to be of type "%s", "%s" given.',
+                ucfirst($this->context),
                 $this->interface,
                 get_class($service)
             ));
@@ -105,11 +103,16 @@ final class SinglePrioritizedServiceRegistry implements SinglePrioritizedService
     private function sortRegistry(): void
     {
         $registry = $this->registry;
-        usort($registry, static function (array $a, array $b): int {
+        uasort($registry, static function (array $a, array $b): int {
             return $b['priority'] <=> $a['priority'];
         });
 
         $this->sorted = true;
-        $this->registry = array_values($registry);
+        $this->registry = $registry;
+    }
+
+    public function createServiceId(object $service): string
+    {
+        return spl_object_hash($service);
     }
 }

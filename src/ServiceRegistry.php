@@ -34,14 +34,8 @@ final class ServiceRegistry implements ServiceRegistryInterface
     /**
      * @param T $service
      */
-    public function register($service): void
+    public function register(object $service): void
     {
-        if (!is_object($service)) {
-            throw new \InvalidArgumentException(
-                sprintf('%s parameter should be object of real class.', ucfirst($this->context))
-            );
-        }
-
         $serviceId = $this->createServiceId($service);
 
         if ($this->has($service)) {
@@ -57,7 +51,7 @@ final class ServiceRegistry implements ServiceRegistryInterface
         $this->services[$serviceId] = $service;
     }
 
-    public function unregister($service): void
+    public function unregister(string|object $service): void
     {
         if (!$this->has($service)) {
             throw NonExistingServiceException::createFromContextAndType($this->context, $this->createServiceId($service), array_keys($this->services));
@@ -71,7 +65,7 @@ final class ServiceRegistry implements ServiceRegistryInterface
      *
      * @return bool
      */
-    public function has($service): bool
+    public function has(string|object $service): bool
     {
         return isset($this->services[$this->createServiceId($service)]);
     }

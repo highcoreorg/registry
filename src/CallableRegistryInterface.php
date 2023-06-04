@@ -12,7 +12,7 @@ use Highcore\Component\Registry\Exception\NonExistingServiceException;
  *
  * @psalm-type RegistryItem = array{service: T, method: string>
  */
-interface ServiceMethodRegistryInterface
+interface CallableRegistryInterface
 {
     /**
      * @return array<string, RegistryItem>
@@ -32,23 +32,12 @@ interface ServiceMethodRegistryInterface
      *
      * @throws NonExistingServiceException
      */
-    public function get(string $identifier, string $service);
+    public function get(string $identifier);
 
-    public function has(string $identifier, string $service): bool;
-
-    public function hasIdentifier(string $identifier): bool;
+    public function has(string $identifier): bool;
 
     /**
      * @throws NonExistingServiceException
      */
-    public function unregister(string $identifier, string $service): void;
-
-    public function unregisterAllById(string $identifier): bool;
-
-    /**
-     * @return T[]
-     *
-     * @throws NonExistingServiceException
-     */
-    public function getAllById(string $identifier): array;
+    public function unregister(string $identifier): void;
 }

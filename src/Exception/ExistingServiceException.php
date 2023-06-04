@@ -16,8 +16,8 @@ class ExistingServiceException extends \InvalidArgumentException
         return new self(sprintf('%s of type "%s" already exists.', ucfirst($context), $type));
     }
 
-    public static function createFromContextAndTypeAndService(string $context, string $type, string $service): self
+    public static function createFromContextAndIdAndServiceAndMethod(string $context, string $id, string $serviceClass, string $method): self
     {
-        return new self(sprintf('%s of type "%s" and service "%s" already exists.', ucfirst($context), $type, $service));
+        return new self(sprintf('%s with id "%s" and callable "%s::%s()" already exists.', ucfirst($context), $id, $serviceClass, $method));
     }
 }

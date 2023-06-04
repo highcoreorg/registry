@@ -10,4 +10,9 @@ use PHPUnit\Framework\Attributes\CoversNothing;
 final class TestService implements TestServiceInterface
 {
     public string $test = '';
+
+    public function testMethod(): string
+    {
+        return 'test';
+    }
 }

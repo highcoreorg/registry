@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Highcore\Component\Registry\Exception;
 
-use Highcore\Component\Registry\ServiceMethodItem;
+use Highcore\Component\Registry\CallableItem;
 
 class NonExistingServiceException extends \InvalidArgumentException
 {
@@ -25,34 +25,33 @@ class NonExistingServiceException extends \InvalidArgumentException
     }
 
     /**
-     * @param array<string, ServiceMethodItem> $existingServices
+     * @param array<string, CallableItem> $existingServices
      */
-    public static function createFromContextAndTypeAndService(string $context, string $type, string $service, array $existingServices): self
+    public static function createFromContextAndId(string $context, string $id, array $existingServices): self
     {
         return new self(sprintf(
-            '%s "%s" with id "%s" does not exist, available %ss: "%s"',
+            '%s with id "%s" does not exist, available %ss: "%s"',
             ucfirst($context),
-            $type,
-            $service,
+            $id,
             $context,
             implode('", "', self::formatServiceMethodItems($existingServices))
         ));
     }
 
     /**
-     * @param array<string, ServiceMethodItem> $existingServices
+     * @param array<string, CallableItem> $existingServices
      */
     private static function formatServiceMethodItems(array $existingServices): array
     {
         $results = [];
 
-        foreach ($existingServices as $identifier => $services) {
-            /** @var ServiceMethodItem $service */
-            foreach ($services as $service) {
-                $results[] = is_int($identifier)
-                    ? \sprintf('%s::%s', $service->service, $service->method)
-                    : \sprintf('[%s] - %s::%s', $identifier, $service->service, $service->method);
-            }
+        /** @var CallableItem $service */
+        foreach ($existingServices as $identifier => $service) {
+            $serviceClass = get_class($service->service);
+
+            $results[] = is_int($identifier)
+                ? \sprintf('%s::%s', $serviceClass, $service->method)
+                : \sprintf('[%s] - %s::%s', $identifier, $serviceClass, $service->method);
         }
 
         return $results;

@@ -7,7 +7,6 @@ namespace Highcore\Component\Registry\Tests;
 use Highcore\Component\Registry\Exception\ExistingServiceException;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
 use Highcore\Component\Registry\IdentityServiceRegistry;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 final class IdentityServiceRegistryTest extends TestCase

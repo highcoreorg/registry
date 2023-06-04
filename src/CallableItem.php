@@ -7,7 +7,7 @@ namespace Highcore\Component\Registry;
 /**
  * @template T
  */
-final class ServiceMethodItem
+final class CallableItem
 {
     /**
      * @param T $service

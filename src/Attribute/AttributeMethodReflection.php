@@ -33,7 +33,7 @@ final class AttributeMethodReflection
         $methods = [];
         foreach ($this->reflection->getMethods($filter) as $method) {
             if (null !== $this->reader->firstFunctionMetadata($method, $attributeClass)) {
-                $methods[] = $method->getName();
+                $methods[] = $method;
             }
         }
 

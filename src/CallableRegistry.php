@@ -12,7 +12,7 @@ use Highcore\Component\Registry\Exception\NonExistingServiceException;
  *
  * @template-implements CallableRegistryInterface<CallableItem<T>>
  */
-final class CallableServiceRegistry implements CallableRegistryInterface
+final class CallableRegistry implements CallableRegistryInterface
 {
     /** @var array<string, array<string, CallableItem<T>> */
     private array $services = [];

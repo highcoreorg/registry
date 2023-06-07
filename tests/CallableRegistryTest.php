@@ -6,14 +6,14 @@ namespace Highcore\Component\Registry\Tests;
 
 use Highcore\Component\Registry\Exception\ExistingServiceException;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
-use Highcore\Component\Registry\CallableServiceRegistry;
+use Highcore\Component\Registry\CallableRegistry;
 use PHPUnit\Framework\TestCase;
 
 final class CallableRegistryTest extends TestCase
 {
     public function test_fail_get_unregistered_service(): void
     {
-        $registry = new CallableServiceRegistry(TestServiceInterface::class);
+        $registry = new CallableRegistry(TestServiceInterface::class);
 
         $this->expectException(NonExistingServiceException::class);
         $this->expectExceptionMessageMatches(sprintf(
@@ -29,7 +29,7 @@ final class CallableRegistryTest extends TestCase
 
     public function test_get_registered_service(): void
     {
-        $registry = new CallableServiceRegistry(TestServiceInterface::class);
+        $registry = new CallableRegistry(TestServiceInterface::class);
 
         $service1 = new TestService();
         $service1->test = 'test';
@@ -45,7 +45,7 @@ final class CallableRegistryTest extends TestCase
 
     public function test_correct_register_with_interface(): void
     {
-        $registry = new CallableServiceRegistry(TestServiceInterface::class);
+        $registry = new CallableRegistry(TestServiceInterface::class);
 
         $services=  [];
         $services[TestService::class] = new TestService();
@@ -63,7 +63,7 @@ final class CallableRegistryTest extends TestCase
 
     public function test_correct_register_without_interface(): void
     {
-        $registry = new CallableServiceRegistry();
+        $registry = new CallableRegistry();
 
         $services=  [];
         $services[TestService::class] = new TestService();
@@ -93,14 +93,14 @@ final class CallableRegistryTest extends TestCase
             $method,
         ));
 
-        $registry = new CallableServiceRegistry(TestServiceInterface::class);
+        $registry = new CallableRegistry(TestServiceInterface::class);
         $registry->register($serviceIdentifier, new TestService(), $method);
         $registry->register($serviceIdentifier, new TestService(), $method);
     }
 
     public function test_incorrect_register_with_interface(): void
     {
-        $registry = new CallableServiceRegistry(TestServiceInterface::class);
+        $registry = new CallableRegistry(TestServiceInterface::class);
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessageMatches(\sprintf(
@@ -113,14 +113,14 @@ final class CallableRegistryTest extends TestCase
 
     public function test_has_unregistered_service(): void
     {
-        $registry = new CallableServiceRegistry(TestServiceInterface::class);
+        $registry = new CallableRegistry(TestServiceInterface::class);
         self::assertFalse($registry->has(TestService::class));
         self::assertFalse($registry->has('test_service'));
     }
 
     public function test_has_registered_service(): void
     {
-        $registry = new CallableServiceRegistry(TestServiceInterface::class);
+        $registry = new CallableRegistry(TestServiceInterface::class);
         $registry->register(TestService::class, new TestService(), 'testMethod');
         $registry->register('test_service', new TestService(), 'testMethod');
 
@@ -130,7 +130,7 @@ final class CallableRegistryTest extends TestCase
 
     public function test_fail_unregister_unregistered_service(): void
     {
-        $registry = new CallableServiceRegistry(TestServiceInterface::class);
+        $registry = new CallableRegistry(TestServiceInterface::class);
 
         $this->expectException(NonExistingServiceException::class);
         $this->expectExceptionMessageMatches(sprintf(

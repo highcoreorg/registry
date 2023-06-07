@@ -104,7 +104,7 @@ final class SinglePrioritizedServiceRegistry implements SinglePrioritizedService
     {
         $registry = $this->registry;
         uasort($registry, static function (array $a, array $b): int {
-            return $b['priority'] <=> $a['priority'];
+            return $a['priority'] <=> $b['priority'];
         });
 
         $this->sorted = true;

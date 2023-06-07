@@ -93,7 +93,7 @@ final class SinglePrioritizedServiceRegistryTest extends TestCase
     public function createServiceListWithPriority(): array
     {
         $services = [];
-        for ($i = 100; $i > 10; $i -= 10) {
+        for ($i = 10; $i < 100; $i += 10) {
             $service = ($i % 20 === 0)
                 ? new class {
                 }

@@ -14,6 +14,8 @@ use Highcore\Component\Registry\Exception\NonExistingServiceException;
  */
 final class CallableRegistry implements CallableRegistryInterface
 {
+    use ServiceInterfaceImplementsTrait;
+
     /** @var array<string, array<string, CallableItem<T>> */
     private array $services = [];
 
@@ -21,7 +23,7 @@ final class CallableRegistry implements CallableRegistryInterface
      * @property null|class-string<T> $className
      */
     public function __construct(
-        private readonly ?string $className = null,
+        private readonly ?string $interface = null,
         private readonly string $context = 'service',
     ) {
     }
@@ -44,12 +46,7 @@ final class CallableRegistry implements CallableRegistryInterface
             );
         }
 
-        if (null !== $this->className && !$service instanceof $this->className) {
-            throw new \InvalidArgumentException(sprintf(
-                '%s needs to be of type "%s", "%s" given.',
-                ucfirst($this->context), $this->className, $serviceClass
-            ));
-        }
+        $this->assertServiceIsInstanceOfServiceType($this->context, $service);
 
         $this->services[$identifier] = new CallableItem(service: $service, method: $method);
     }
@@ -57,7 +54,7 @@ final class CallableRegistry implements CallableRegistryInterface
     public function get(string $identifier)
     {
         if (!$this->has($identifier)) {
-            throw NonExistingServiceException::createFromContextAndId(
+            throw NonExistingServiceException::createFromCallableContextAndId(
                 $this->context, $identifier, $this->services
             );
         }
@@ -73,7 +70,7 @@ final class CallableRegistry implements CallableRegistryInterface
     public function unregister(string $identifier): void
     {
         if (!$this->has($identifier)) {
-            throw NonExistingServiceException::createFromContextAndId(
+            throw NonExistingServiceException::createFromCallableContextAndId(
                 $this->context, $identifier, $this->services
             );
         }

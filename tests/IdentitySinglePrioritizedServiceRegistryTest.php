@@ -54,7 +54,7 @@ final class IdentitySinglePrioritizedServiceRegistryTest extends TestCase
     {
         $this->expectException(NonExistingServiceException::class);
         $this->expectExceptionMessageMatches(sprintf(
-            '/^Service "%s" does not exist, available service services: ".*"$/',
+            '/^Service "%s" does not exist, available services: ".*"$/',
             addcslashes(TestService::class, '\\')
         ));
 

@@ -6,6 +6,7 @@ namespace Highcore\Component\Registry;
 
 use Highcore\Component\Registry\Exception\ExistingServiceException;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
+use Highcore\Component\Registry\Exception\ServiceRegistryException;
 
 /**
  * @template T
@@ -19,13 +20,15 @@ use Highcore\Component\Registry\Exception\NonExistingServiceException;
  */
 final class SinglePrioritizedServiceRegistry implements SinglePrioritizedServiceRegistryInterface
 {
+    use ServiceInterfaceImplementsTrait;
+
     /** @var array<array-key, ServiceItem> */
     private array $registry = [];
 
     private bool $sorted = true;
 
     /**
-     * @property class-string<T>
+     * @property null|class-string<T> $interface
      */
     public function __construct(
         private readonly ?string $interface = null,
@@ -46,7 +49,7 @@ final class SinglePrioritizedServiceRegistry implements SinglePrioritizedService
      */
     public function register(object $service, int $priority = 0): void
     {
-        $this->assertServiceIsInstanceOfServiceType($service);
+        $this->assertServiceIsInstanceOfServiceType($this->context, $service);
 
         if ($this->has($service)) {
             throw ExistingServiceException::createFromContextAndType(
@@ -74,21 +77,9 @@ final class SinglePrioritizedServiceRegistry implements SinglePrioritizedService
 
     public function has(object $service): bool
     {
-        $this->assertServiceIsInstanceOfServiceType($service);
+        $this->assertServiceIsInstanceOfServiceType($this->context, $service);
 
         return isset($this->registry[$this->createServiceId($service)]);
-    }
-
-    private function assertServiceIsInstanceOfServiceType(object $service): void
-    {
-        if (null !== $this->interface && !$service instanceof $this->interface) {
-            throw new \InvalidArgumentException(sprintf(
-                '%s needs to be of type "%s", "%s" given.',
-                ucfirst($this->context),
-                $this->interface,
-                get_class($service)
-            ));
-        }
     }
 
     private function getSortedRegistry(): array

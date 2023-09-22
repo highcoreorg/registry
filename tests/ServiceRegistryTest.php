@@ -6,6 +6,7 @@ namespace Highcore\Component\Registry\Tests;
 
 use Highcore\Component\Registry\Exception\ExistingServiceException;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
+use Highcore\Component\Registry\Exception\ServiceRegistryException;
 use Highcore\Component\Registry\ServiceRegistry;
 use PHPUnit\Framework\TestCase;
 
@@ -41,7 +42,7 @@ final class ServiceRegistryTest extends TestCase
 
     public function test_incorrect_register_with_interface(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(ServiceRegistryException::class);
         $this->expectExceptionMessageMatches(\sprintf(
             '/^Service needs to be of type "%s", ".*" given\.$/',
             addcslashes(TestServiceInterface::class, '\\')
@@ -85,7 +86,7 @@ final class ServiceRegistryTest extends TestCase
     {
         $this->expectException(NonExistingServiceException::class);
         $this->expectExceptionMessageMatches(sprintf(
-            '/^Service "%s" does not exist, available service services: ""$/',
+            '/^Service "%s" does not exist, available services: ""$/',
             addcslashes(TestService::class, '\\')
         ));
 
@@ -97,7 +98,7 @@ final class ServiceRegistryTest extends TestCase
     {
         $this->expectException(NonExistingServiceException::class);
         $this->expectExceptionMessageMatches(sprintf(
-            '/^Service "%s" does not exist, available service services: ".+"$/',
+            '/^Service "%s" does not exist, available services: ".+"$/',
             addcslashes(TestService::class, '\\')
         ));
 

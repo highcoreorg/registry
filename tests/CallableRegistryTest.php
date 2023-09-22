@@ -7,6 +7,7 @@ namespace Highcore\Component\Registry\Tests;
 use Highcore\Component\Registry\Exception\ExistingServiceException;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
 use Highcore\Component\Registry\CallableRegistry;
+use Highcore\Component\Registry\Exception\ServiceRegistryException;
 use PHPUnit\Framework\TestCase;
 
 final class CallableRegistryTest extends TestCase
@@ -102,7 +103,7 @@ final class CallableRegistryTest extends TestCase
     {
         $registry = new CallableRegistry(TestServiceInterface::class);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(ServiceRegistryException::class);
         $this->expectExceptionMessageMatches(\sprintf(
             '/^Service needs to be of type "%s", ".*" given\.$/',
             addcslashes(TestServiceInterface::class, '\\')

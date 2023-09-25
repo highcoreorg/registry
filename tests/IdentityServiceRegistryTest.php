@@ -6,6 +6,7 @@ namespace Highcore\Component\Registry\Tests;
 
 use Highcore\Component\Registry\Exception\ExistingServiceException;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
+use Highcore\Component\Registry\Exception\ServiceRegistryException;
 use Highcore\Component\Registry\IdentityServiceRegistry;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +18,7 @@ final class IdentityServiceRegistryTest extends TestCase
 
         $this->expectException(NonExistingServiceException::class);
         $this->expectExceptionMessageMatches(sprintf(
-            '/^Service "%s" does not exist, available service services: ("[a-z0-9_]+"(, )?)+$/',
+            '/^Service "%s" does not exist, available services: ("[a-z0-9_]+"(, )?)+$/',
             addcslashes(TestService::class, '\\')
         ));
 
@@ -89,7 +90,7 @@ final class IdentityServiceRegistryTest extends TestCase
     {
         $registry = new IdentityServiceRegistry(TestServiceInterface::class);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(ServiceRegistryException::class);
         $this->expectExceptionMessageMatches(\sprintf(
             '/^Service needs to be of type "%s", ".*" given\.$/',
             addcslashes(TestServiceInterface::class, '\\')
@@ -121,7 +122,7 @@ final class IdentityServiceRegistryTest extends TestCase
 
         $this->expectException(NonExistingServiceException::class);
         $this->expectExceptionMessageMatches(sprintf(
-            '/^Service "%s" does not exist, available service services: ("[a-z0-9_]+"(, )?)+$/',
+            '/^Service "%s" does not exist, available services: ("[a-z0-9_]+"(, )?)+$/',
             addcslashes(TestService::class, '\\')
         ));
 

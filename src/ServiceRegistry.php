@@ -6,6 +6,7 @@ namespace Highcore\Component\Registry;
 
 use Highcore\Component\Registry\Exception\ExistingServiceException;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
+use Highcore\Component\Registry\Exception\ServiceRegistryException;
 
 /**
  * @template T
@@ -14,6 +15,8 @@ use Highcore\Component\Registry\Exception\NonExistingServiceException;
  */
 final class ServiceRegistry implements ServiceRegistryInterface
 {
+    use ServiceInterfaceImplementsTrait;
+
     /** @var array<string, T> */
     private array $services = [];
 
@@ -42,11 +45,7 @@ final class ServiceRegistry implements ServiceRegistryInterface
             throw ExistingServiceException::createFromContextAndType($this->context, $serviceId);
         }
 
-        if (null !== $this->interface && !$service instanceof $this->interface) {
-            throw new \InvalidArgumentException(
-                sprintf('%s needs to be of type "%s", "%s" given.', ucfirst($this->context), $this->interface, get_class($service))
-            );
-        }
+        $this->assertServiceIsInstanceOfServiceType($this->context, $service);
 
         $this->services[$serviceId] = $service;
     }

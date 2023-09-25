@@ -6,18 +6,36 @@ namespace Highcore\Component\Registry\Exception;
 
 use Highcore\Component\Registry\CallableItem;
 
-class NonExistingServiceException extends \InvalidArgumentException
+class NonExistingServiceException extends ServiceRegistryException
 {
     private function __construct(string $message)
     {
         parent::__construct($message);
     }
 
+    /**
+     * @param string[] $existingServices
+     */
     public static function createFromContextAndType(string $context, string $type, array $existingServices): self
     {
         return new self(sprintf(
-            '%s "%s" does not exist, available %s services: "%s"',
+            '%s "%s" does not exist, available %ss: "%s"',
             ucfirst($context),
+            $type,
+            $context,
+            implode('", "', $existingServices)
+        ));
+    }
+
+    /**
+     * @param string[] $existingServices
+     */
+    public static function createFromContextAndTypeAndService(string $context, string $type, object $service, array $existingServices): self
+    {
+        return new self(sprintf(
+            '%s "%s" does not exist inside the "%s" group, available %ss: "%s"',
+            ucfirst($context),
+            get_class($service),
             $type,
             $context,
             implode('", "', $existingServices)
@@ -27,7 +45,7 @@ class NonExistingServiceException extends \InvalidArgumentException
     /**
      * @param array<string, CallableItem> $existingServices
      */
-    public static function createFromContextAndId(string $context, string $id, array $existingServices): self
+    public static function createFromCallableContextAndId(string $context, string $id, array $existingServices): self
     {
         return new self(sprintf(
             '%s with id "%s" does not exist, available %ss: "%s"',

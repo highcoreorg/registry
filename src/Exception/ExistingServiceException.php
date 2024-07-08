@@ -25,4 +25,9 @@ class ExistingServiceException extends ServiceRegistryException
     {
         return new self(sprintf('%s with id "%s" and callable "%s::%s()" already exists.', ucfirst($context), $id, $serviceClass, $method));
     }
+
+    public static function createFromContextAndGroupAndIdAndServiceAndMethod(string $context, string $group, string $id, string $serviceClass, string $method): self
+    {
+        return new self(sprintf('%s with id "%s" within group "%s" and callable "%s::%s()" already exists.', ucfirst($context), $id, $group, $serviceClass, $method));
+    }
 }

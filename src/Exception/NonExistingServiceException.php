@@ -56,6 +56,29 @@ class NonExistingServiceException extends ServiceRegistryException
         ));
     }
 
+    public static function createFromGroupCallableContextAndId(string $context, string $group, string $identifier, array $existingServices): self
+    {
+        return new self(sprintf(
+            '%s with id "%s" within group "%s" does not exist, available %ss: "%s"',
+            ucfirst($context),
+            $identifier,
+            $group,
+            $context,
+            implode('", "', self::formatServiceMethodItems($existingServices))
+        ));
+    }
+
+    public static function createFromGroupCallableContext(string $context, string $group, array $existingServices): self
+    {
+        return new self(sprintf(
+            '%s within group "%s" does not exist, available %ss: "%s"',
+            ucfirst($context),
+            $group,
+            $context,
+            implode('", "', self::formatServiceMethodItems($existingServices))
+        ));
+    }
+
     /**
      * @param array<string, CallableItem> $existingServices
      */

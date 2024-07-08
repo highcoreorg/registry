@@ -24,7 +24,26 @@ interface IdentityPrioritizedServiceRegistryInterface
     public function only(array $identifiers = []): iterable;
 
     /**
+     * @return T
+     */
+    public function first(string $identifier): object;
+
+    /**
+     * @return T
+     */
+    public function last(string $identifier): object;
+
+    /**
      * @return iterable<string, T>
+     */
+    public function allById(string $identifier): iterable;
+
+    /**
+     * @return iterable<string, T>
+     *
+     * @deprecated
+     *
+     * @see IdentityPrioritizedServiceRegistryInterface::allById() instead of this method
      */
     public function getItemsById(string $identifier): iterable;
 

@@ -7,9 +7,8 @@ namespace Highcore\Component\Registry\Tests;
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
 use Highcore\Component\Registry\Exception\ServiceRegistryException;
 use Highcore\Component\Registry\IdentityPrioritizedServiceRegistry;
-use PHPUnit\Framework\TestCase;
 
-final class IdentityPrioritizedServiceRegistryTest extends TestCase
+final class IdentityPrioritizedServiceRegistryTest extends AbstractTestCase
 {
     public function test_register_service_with_interface(): void
     {
@@ -22,7 +21,7 @@ final class IdentityPrioritizedServiceRegistryTest extends TestCase
 
         foreach ($registry->all() as $index => $registryService) {
             self::assertInstanceOf(TestServiceInterface::class, $registryService);
-            self::assertEquals(spl_object_hash($services[$index]), spl_object_hash($registryService));
+            self::assertObjectEqualsByHash($services[$index], $registryService);
         }
     }
 
@@ -34,7 +33,7 @@ final class IdentityPrioritizedServiceRegistryTest extends TestCase
         $registry->register('test.group', $services[] = new TestService());
 
         foreach ($registry->all() as $index => $registryService) {
-            self::assertEquals(spl_object_hash($services[$index]), spl_object_hash($registryService));
+            self::assertObjectEqualsByHash($services[$index], $registryService);
         }
     }
 
@@ -81,22 +80,52 @@ final class IdentityPrioritizedServiceRegistryTest extends TestCase
         self::assertFalse($registry->has('test.group'));
     }
 
-    public function test_sort_by_priority(): void
+    public function test_sort_services_within_identifier_by_priority(): void
     {
-        $services = $this->createServiceListWithPriority();
+        $expectedServices = $this->createServiceListWithPriority();
         $registry = new IdentityPrioritizedServiceRegistry();
 
-        $clonedServices = $services;
+        $clonedServices = $expectedServices;
         shuffle($clonedServices);
         foreach ($clonedServices as [$service, $priority]) {
             $registry->register('some.group', $service, $priority);
         }
 
-        $registryServices = [...$registry->getItemsById('some.group')];
-        $servicesHashes = \array_map(static fn(array $service) => spl_object_id($service[0]), $services);
-        $registryServicesHashes = \array_map(static fn(object $service) => spl_object_id($service), $registryServices);
+        $expectedServices = \array_map(static fn(array $service) => $service[0], $expectedServices);
+        self::assertObjectsEqualsByHash($expectedServices, [...$registry->allById('some.group')]);
+    }
 
-        self::assertEquals($servicesHashes, $registryServicesHashes);
+    public function test_correct_get_first_service_within_identifier_by_priority(): void
+    {
+        $services = $this->createServiceListWithPriority();
+        $registry = new IdentityPrioritizedServiceRegistry();
+
+        $serviceId = 'some.group';
+        [$expectedService] = reset($services);
+
+        shuffle($services);
+        foreach ($services as [$service, $priority]) {
+            $registry->register($serviceId, $service, $priority);
+        }
+
+        self::assertObjectEqualsByHash($expectedService, $registry->first($serviceId));
+    }
+
+    public function test_correct_get_last_service_within_identifier_by_priority(): void
+    {
+        $services = $this->createServiceListWithPriority();
+        $registry = new IdentityPrioritizedServiceRegistry();
+
+        $serviceId = 'some.group';
+        [$expectedService] = end($services);
+        reset($expectedService);
+
+        shuffle($services);
+        foreach ($services as [$service, $priority]) {
+            $registry->register($serviceId, $service, $priority);
+        }
+
+        self::assertObjectEqualsByHash($expectedService, $registry->last($serviceId));
     }
 
     public function test_correct_all_using_only(): void
@@ -120,14 +149,13 @@ final class IdentityPrioritizedServiceRegistryTest extends TestCase
 
         $expectedServices = array_merge(...$expectedServices);
         usort($expectedServices, static fn ($a, $b) => $b[1] <=> $a[1]);
-        $expectedServiceHashes = array_map(static fn (array $s) => spl_object_hash($s[0]), $expectedServices);
+        $expectedServices = array_map(static fn (array $s) => $s[0], $expectedServices);
 
         // Mixin unexpected service with unexpected group to check if only works
         $registry->register('test_service_group_3', new TestService(), 10);
         $registry->register('test_service_group_4', new TestService(), 11);
 
-        $result = array_map(static fn($s) => spl_object_hash($s), [...$registry->only($ids)]);
-        self::assertSame($expectedServiceHashes, $result);
+        self::assertObjectsEqualsByHash($expectedServices, [...$registry->only($ids)]);
     }
 
     public function test_correct_all_using_all(): void

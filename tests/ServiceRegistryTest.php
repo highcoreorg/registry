@@ -10,7 +10,7 @@ use Highcore\Component\Registry\Exception\ServiceRegistryException;
 use Highcore\Component\Registry\ServiceRegistry;
 use PHPUnit\Framework\TestCase;
 
-final class ServiceRegistryTest extends TestCase
+final class ServiceRegistryTest extends AbstractTestCase
 {
     public function test_correct_register_with_interface(): void
     {
@@ -20,10 +20,7 @@ final class ServiceRegistryTest extends TestCase
         self::assertTrue($registry->has(TestService::class));
         self::assertTrue($registry->has(new TestService()));
 
-        self::assertEquals(
-            array_map(static fn($s) => spl_object_hash($s), $services),
-            array_map(static fn($s) => spl_object_hash($s), $registry->all()),
-        );
+        self::assertObjectsEqualsByHash($services, $registry->all());
     }
 
     public function test_correct_register_without_interface(): void
@@ -34,10 +31,7 @@ final class ServiceRegistryTest extends TestCase
         self::assertTrue($registry->has(TestService::class));
         self::assertTrue($registry->has(new TestService()));
 
-        self::assertEquals(
-            array_map(static fn($s) => spl_object_hash($s), $services),
-            array_map(static fn($s) => spl_object_hash($s), $registry->all()),
-        );
+        self::assertObjectsEqualsByHash($services, $registry->all());
     }
 
     public function test_incorrect_register_with_interface(): void

@@ -6,10 +6,8 @@ namespace Highcore\Component\Registry\Tests;
 
 use Highcore\Component\Registry\Exception\NonExistingServiceException;
 use Highcore\Component\Registry\IdentitySinglePrioritizedServiceRegistry;
-use Highcore\Component\Registry\SinglePrioritizedServiceRegistry;
-use PHPUnit\Framework\TestCase;
 
-final class IdentitySinglePrioritizedServiceRegistryTest extends TestCase
+final class IdentitySinglePrioritizedServiceRegistryTest extends AbstractTestCase
 {
     public function test_register_service_with_interface(): void
     {
@@ -20,7 +18,7 @@ final class IdentitySinglePrioritizedServiceRegistryTest extends TestCase
 
         foreach ($registry->all() as $index => $registryService) {
             self::assertInstanceOf(TestServiceInterface::class, $registryService);
-            self::assertEquals(spl_object_hash($services[$index]), spl_object_hash($registryService));
+            self::assertObjectEqualsByHash($services[$index], $registryService);
         }
     }
 
@@ -32,7 +30,7 @@ final class IdentitySinglePrioritizedServiceRegistryTest extends TestCase
         $registry->register('test_service_1', $services['test_service_1'] = new TestService());
 
         foreach ($registry->all() as $index => $registryService) {
-            self::assertEquals(spl_object_hash($services[$index]), spl_object_hash($registryService));
+            self::assertObjectEqualsByHash($services[$index], $registryService);
         }
     }
 
@@ -116,7 +114,7 @@ final class IdentitySinglePrioritizedServiceRegistryTest extends TestCase
             $registry->register($id, $service);
         }
 
-        $result = [...$registry->all($ids)];
+        $result = [...$registry->all()];
         self::assertSame($ids, array_keys($result));
     }
 
@@ -158,6 +156,61 @@ final class IdentitySinglePrioritizedServiceRegistryTest extends TestCase
         $registryServicesHashes = \array_keys([...$registry->all()]);
 
         self::assertEquals($serviceIds, $registryServicesHashes);
+    }
+
+    public function test_get_item_by_id(): void
+    {
+        $services = $this->createServiceListWithPriority();
+        $registry = new IdentitySinglePrioritizedServiceRegistry();
+
+        $keys = \array_keys($services);
+        shuffle($keys);
+
+        $expectedKey = reset($keys);
+        [$expectedService] = $services[$expectedKey];
+
+        foreach ($keys as $key) {
+            [$service, $priority] = $services[$key];
+            $registry->register($key, $service, $priority);
+        }
+
+        self::assertObjectEqualsByHash($expectedService, $registry->get($expectedKey));
+    }
+
+    public function test_get_first_item(): void
+    {
+        $services = $this->createServiceListWithPriority();
+        $registry = new IdentitySinglePrioritizedServiceRegistry();
+
+        $keys = \array_keys($services);
+        $firstKey = reset($keys);
+        [$expectedService] = $services[$firstKey];
+
+        shuffle($keys);
+        foreach ($keys as $key) {
+            [$service, $priority] = $services[$key];
+            $registry->register($key, $service, $priority);
+        }
+
+        self::assertObjectEqualsByHash($expectedService, $registry->first());
+    }
+
+    public function test_get_last_item(): void
+    {
+        $services = $this->createServiceListWithPriority();
+        $registry = new IdentitySinglePrioritizedServiceRegistry();
+
+        $keys = \array_keys($services);
+        $lastKey = end($keys);
+        [$expectedService] = $services[$lastKey];
+
+        shuffle($keys);
+        foreach ($keys as $key) {
+            [$service, $priority] = $services[$key];
+            $registry->register($key, $service, $priority);
+        }
+
+        self::assertObjectEqualsByHash($expectedService, $registry->last());
     }
 
     public function createServiceListWithPriority(): array

@@ -19,7 +19,12 @@ use Highcore\Component\Registry\Exception\NonExistingServiceException;
  */
 final class IdentitySinglePrioritizedServiceRegistry implements IdentitySinglePrioritizedServiceRegistryInterface
 {
-    /** @var array<array-key, ServiceItem> */
+    /**
+     * @use SinglePrioritizedTrait<T>
+     */
+    use SinglePrioritizedTrait;
+
+    /** @var ServiceItem[] */
     private array $registry = [];
 
     private bool $sorted = true;
@@ -60,6 +65,9 @@ final class IdentitySinglePrioritizedServiceRegistry implements IdentitySinglePr
         $this->sorted = false;
     }
 
+    /**
+     * @return T
+     */
     public function unregister(string $identifier): void
     {
         if (!$this->has($identifier)) {
@@ -71,6 +79,22 @@ final class IdentitySinglePrioritizedServiceRegistry implements IdentitySinglePr
         }
 
         unset($this->registry[$identifier]);
+    }
+
+    /**
+     * @return T
+     */
+    public function get(string $identifier): object
+    {
+        if (!$this->has($identifier)) {
+            throw NonExistingServiceException::createFromContextAndType(
+                $this->context,
+                $identifier,
+                array_keys($this->registry),
+            );
+        }
+
+        return $this->registry[$identifier][$this->context];
     }
 
     public function has(string $identifier): bool
@@ -90,6 +114,9 @@ final class IdentitySinglePrioritizedServiceRegistry implements IdentitySinglePr
         }
     }
 
+    /**
+     * @return ServiceItem[]
+     */
     private function getSortedRegistry(): array
     {
         if (!$this->sorted) {

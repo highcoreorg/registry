@@ -25,6 +25,16 @@ interface IdentitySinglePrioritizedServiceRegistryInterface
     public function only(array $identifiers = []): iterable;
 
     /**
+     * @return T
+     */
+    public function first(): object;
+
+    /**
+     * @return T
+     */
+    public function last(): object;
+
+    /**
      * @param T $service
      *
      * @throws ExistingServiceException

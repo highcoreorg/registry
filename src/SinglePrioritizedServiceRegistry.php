@@ -20,6 +20,10 @@ use Highcore\Component\Registry\Exception\ServiceRegistryException;
  */
 final class SinglePrioritizedServiceRegistry implements SinglePrioritizedServiceRegistryInterface
 {
+    /**
+     * @use SinglePrioritizedTrait<T>
+     */
+    use SinglePrioritizedTrait;
     use ServiceInterfaceImplementsTrait;
 
     /** @var array<array-key, ServiceItem> */

@@ -36,4 +36,14 @@ interface SinglePrioritizedServiceRegistryInterface
      * @param T $service
      */
     public function has(object $service): bool;
+
+    /**
+     * @return T
+     */
+    public function first(): object;
+
+    /**
+     * @return T
+     */
+    public function last(): object;
 }

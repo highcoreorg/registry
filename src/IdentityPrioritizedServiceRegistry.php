@@ -69,7 +69,7 @@ final class IdentityPrioritizedServiceRegistry implements IdentityPrioritizedSer
     /**
      * @return \Generator<IdentityServiceItem>
      */
-    public function getItemsById(string $identifier): \Generator
+    public function allById(string $identifier): \Generator
     {
         if (!$this->has($identifier)) {
             throw NonExistingServiceException::createFromContextAndType($this->context, $identifier, $this->getAvailableIds());
@@ -80,6 +80,18 @@ final class IdentityPrioritizedServiceRegistry implements IdentityPrioritizedSer
         foreach ($this->registry[$identifier] as $record) {
             yield $record[$this->context];
         }
+    }
+
+    /**
+     * @return \Generator<IdentityServiceItem>
+     *
+     * @deprecated
+     *
+     * @see IdentityPrioritizedServiceRegistryInterface::allById() instead of this method
+     */
+    public function getItemsById(string $identifier): iterable
+    {
+        yield from $this->allById($identifier);
     }
 
     public function register(string $identifier, object $service, int $priority = 0): void
@@ -178,7 +190,7 @@ final class IdentityPrioritizedServiceRegistry implements IdentityPrioritizedSer
     public function getAvailableItemsById(string $identifier): array
     {
         $availableItems = $this->has($identifier)
-            ? $this->getItemsById($identifier)
+            ? $this->allById($identifier)
             : [];
 
         /** @var T $item */
@@ -192,5 +204,20 @@ final class IdentityPrioritizedServiceRegistry implements IdentityPrioritizedSer
         });
 
         return $items;
+    }
+
+    public function first(string $identifier): object
+    {
+        foreach ($this->allById($identifier) as $item) {
+            // Return first item of all
+            return $item;
+        }
+    }
+
+    public function last(string $identifier): object
+    {
+        $items = iterator_to_array($this->allById($identifier));
+
+        return end($items);
     }
 }

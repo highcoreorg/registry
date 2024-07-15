@@ -34,12 +34,22 @@ interface IdentityPrioritizedServiceRegistryInterface
     public function last(string $identifier): object;
 
     /**
-     * @return iterable<string, T>
+     * @return iterable<T>
      */
     public function allById(string $identifier): iterable;
 
     /**
      * @return iterable<string, T>
+     */
+    public function allFirst(): iterable;
+
+    /**
+     * @return iterable<string, T>
+     */
+    public function allLast(): iterable;
+
+    /**
+     * @return iterable<T>
      *
      * @deprecated
      *

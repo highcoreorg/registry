@@ -48,7 +48,7 @@ final class IdentityPrioritizedServiceRegistry implements IdentityPrioritizedSer
      */
     public function getAvailableIds(): array
     {
-        return array_keys([...$this->all()]);
+        return array_keys($this->registry);
     }
 
     /**
@@ -206,18 +206,49 @@ final class IdentityPrioritizedServiceRegistry implements IdentityPrioritizedSer
         return $items;
     }
 
+    public function allFirst(): iterable
+    {
+        foreach ($this->getAvailableIds() as $identifier) {
+            yield $identifier => $this->first($identifier);
+        }
+    }
+
+    public function allLast(): iterable
+    {
+        foreach ($this->getAvailableIds() as $identifier) {
+            yield $identifier => $this->last($identifier);
+        }
+    }
+
     public function first(string $identifier): object
     {
         foreach ($this->allById($identifier) as $item) {
             // Return first item of all
             return $item;
         }
+
+        throw NonExistingServiceException::createFromContextAndType(
+            $this->context,
+            $identifier,
+            $this->getAvailableIds()
+        );
     }
 
     public function last(string $identifier): object
     {
-        $items = iterator_to_array($this->allById($identifier));
+        $latest = null;
+        foreach ($this->allById($identifier) as $service) {
+            $latest = $service;
+        }
 
-        return end($items);
+        if (null === $latest) {
+            throw NonExistingServiceException::createFromContextAndType(
+                $this->context,
+                $identifier,
+                $this->getAvailableIds()
+            );
+        }
+
+        return $latest;
     }
 }

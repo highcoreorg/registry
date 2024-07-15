@@ -111,6 +111,47 @@ final class IdentityPrioritizedServiceRegistryTest extends AbstractTestCase
         self::assertObjectEqualsByHash($expectedService, $registry->first($serviceId));
     }
 
+    public function test_correct_get_all_first_services_within_identifier_by_priority(): void
+    {
+        $registry = new IdentityPrioritizedServiceRegistry();
+
+        $expectedServices = [];
+        foreach (['some.group', 'some.second_group', 'third.group', 'some.fourth.group'] as $identifier) {
+            $expectedServices[$identifier] = $services = $this->createServiceListWithPriority();
+            shuffle($services);
+
+            foreach ($services as [$service, $priority]) {
+                $registry->register($identifier, $service, $priority);
+            }
+        }
+
+        foreach ($registry->allFirst() as $identifier => $service) {
+            [$expected] = reset($expectedServices[$identifier]);
+
+            self::assertObjectEqualsByHash($expected, $service);
+        }
+    }
+
+    public function test_correct_get_all_last_services_within_identifier_by_priority(): void
+    {
+        $registry = new IdentityPrioritizedServiceRegistry();
+
+        $expectedServices = [];
+        foreach (['some.group', 'some.second_group', 'third.group', 'some.fourth.group'] as $identifier) {
+            $expectedServices[$identifier] = $services = $this->createServiceListWithPriority();
+            shuffle($services);
+
+            foreach ($services as [$service, $priority]) {
+                $registry->register($identifier, $service, $priority);
+            }
+        }
+
+        foreach ($registry->allLast() as $identifier => $service) {
+            [$expected] = end($expectedServices[$identifier]);
+            self::assertObjectEqualsByHash($expected, $service);
+        }
+    }
+
     public function test_correct_get_last_service_within_identifier_by_priority(): void
     {
         $services = $this->createServiceListWithPriority();
